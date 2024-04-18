@@ -4,3 +4,5 @@ matplotlib==3.4.3
 streamlit-shap
 streamlit
 xgboost
+pandas
+numpy

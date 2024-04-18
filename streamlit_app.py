@@ -19,17 +19,17 @@ def load_data():
     return df
 
 data = load_data()
-feature_columns = ['Hand_Grip', 'Balance', 'CS_5', 'Age', 'Pain', 'Comorbidities', 'Depression', 'Breath', 'Cognition']
+feature_columns = ['Cognition','Breath','Depression','Comorbidities', 'Pain','Age','CS_5','Balance','Hand_Grip']
 feature_descriptions = {
-    'Hand_Grip': "Hand grip strength (times)",
-    'Balance': "Balance metric score",
-    'CS_5': "5 meter walk speed (m/s)",
-    'Age': "Age of the individual",
-    'Pain': "Pain assessment score",
-    'Comorbidities': "Number of comorbid conditions",
-    'Depression': "Depression assessment score",
-    'Breath': "Breath hold time (seconds)",
-    'Cognition': "Cognitive function score"
+    'Hand_Grip': "Hand Grip",
+    'Balance': "Standing Balance",
+    'CS_5': "Five-repetiton Chair Stand Test (CS-5)",
+    'Age': "Age",
+    'Pain': "Pain",
+    'Comorbidities': "Number of Comorbidities",
+    'Depression': "Depression",
+    'Breath': "Breathing Function",
+    'Cognition': "Cognitive function"
 }
 X = data[feature_columns]
 y = data['Disability_2020']
@@ -56,7 +56,7 @@ initial_shap_values = explainer(input_df)
 
 # Display initial prediction and SHAP plot
 with prediction_placeholder.container():
-    # st.write(f"Initial Predicted Disability: {initial_prediction[0]:.3f}")
+    # st.write(f"Initial Predicted probability of disability: {initial_prediction[0]:.3f}")
     st.markdown(f"""
     <style>
         .prediction {{
@@ -67,7 +67,7 @@ with prediction_placeholder.container():
             color: rgb(255, 13, 87);
         }}
     </style>
-    <div class="prediction">Initial Predicted Disability: <span class="p_num">{initial_prediction[0]:.3f}</span></div>
+    <div class="prediction">Predicted probability of disability: <span class="p_num">{initial_prediction[0] * 100:.1f}%</span></div>
     """, unsafe_allow_html=True)
 with shap_placeholder.container():
     st_shap(shap.plots.force(explainer.expected_value, initial_shap_values.values[0], input_df.iloc[0]))
@@ -76,23 +76,35 @@ with shap_placeholder.container():
 # Sidebar form for input
 with st.sidebar.form("input_form"):
     inputs = {}
-    inputs["Hand_Grip"] = st.number_input(feature_descriptions["Hand_Grip"], value=X["Hand_Grip"].mean())
-    inputs["Balance"] = st.number_input(feature_descriptions["Balance"], value=X["Balance"].mean())
-    inputs["CS_5"] = st.number_input(feature_descriptions["CS_5"], value=X["CS_5"].mean())
-    inputs["Age"] = st.number_input(feature_descriptions["Age"], value=X["Age"].mean())
     options = [(1, 'Yes'), (0, 'No')]
+    boptions = [(0, '0'), (1, '1'), (2, '2'),(3, '3')]
+    coptions = [(0, '0'), (1, '1'),(2, '≥ 2')]
+    comorbidity_average = X["Comorbidities"].mean()
 
-    inputs["Pain"] = st.selectbox(
-        feature_descriptions["Pain"],
-        options=options,
-        format_func=lambda x: x[1],
-        index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
+    # Determine the default index based on the average value
+    if comorbidity_average < 0.5:
+        com_default_index = 0  # '0'
+    elif comorbidity_average < 1.5:
+        com_default_index = 1  # '1'
+    else:
+        com_default_index = 2  # '≥ 2'
 
-    inputs["Comorbidities"] = st.selectbox(
-        feature_descriptions["Comorbidities"],
-        options=options,
-        format_func=lambda x: x[1],
-        index=1 if X["Comorbidities"].mean() <= 0.5 else 0)[0]
+    ba_default_index = int(round(X["Balance"].mean()))
+    if ba_default_index >= len(boptions):
+        ba_default_index = len(boptions) - 1  # Adjust if the rounded mean is out of the option range
+
+
+    inputs["Cognition"] = st.number_input(
+        label=feature_descriptions["Cognition"],
+        value=int(round(X["Cognition"].mean())),  
+        step=1  
+    )
+
+    inputs["Breath"] = st.number_input(
+        label=feature_descriptions["Breath"],
+        value=int(round(X["Breath"].mean())),  
+        step=1  
+    )
 
     inputs["Depression"] = st.selectbox(
         feature_descriptions["Depression"],
@@ -100,8 +112,34 @@ with st.sidebar.form("input_form"):
         format_func=lambda x: x[1],
         index=1 if X["Depression"].mean() <= 0.5 else 0)[0]
     
-    inputs["Breath"] = st.number_input(feature_descriptions["Breath"], value=X["Breath"].mean())
-    inputs["Cognition"] = st.number_input(feature_descriptions["Cognition"], value=X["Cognition"].mean())
+    inputs["Comorbidities"] = st.selectbox(
+        feature_descriptions["Comorbidities"],
+        options=coptions,
+        format_func=lambda x: x[1],
+        index=com_default_index)[0]
+    
+    inputs["Pain"] = st.selectbox(
+        feature_descriptions["Pain"],
+        options=options,
+        format_func=lambda x: x[1],
+        index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
+
+    inputs["Age"] = st.number_input(
+        label=feature_descriptions["Age"],
+        value=int(round(X["Age"].mean())),  
+        step=1  
+    )
+    
+    inputs["CS_5"] = st.number_input(feature_descriptions["CS_5"], value=X["CS_5"].mean())
+    
+    inputs["Balance"] = st.selectbox(
+        feature_descriptions["Balance"],
+        options=boptions,
+        format_func=lambda x: x[1],
+        index=ba_default_index)[0]
+
+    inputs["Hand_Grip"] = st.number_input(feature_descriptions["Hand_Grip"], value=X["Hand_Grip"].mean())
+
     submitted = st.form_submit_button("Predict")
 
 
@@ -112,7 +150,7 @@ if submitted:
 
     # Update only the placeholders with new inputs
     with prediction_placeholder.container():
-        # st.write(f"Predicted Disability: {prediction[0]:.3f}")
+        # st.write(f"Predicted probability of disability: {prediction[0]:.3f}")
         st.markdown(f"""
             <style>
                 .prediction {{
@@ -123,7 +161,7 @@ if submitted:
                     color: rgb(255, 13, 87);
                 }}
             </style>
-            <div class="prediction">Predicted Disability: <span class="p_num">{prediction[0]:.3f}</span></div>
+            <div class="prediction">Predicted probability of disability: <span class="p_num">{prediction[0] * 100:.1f}%</span></div>
             """, unsafe_allow_html=True)
     with shap_placeholder.container():
         st_shap(shap.plots.force(explainer.expected_value, shap_values.values[0], input_df.iloc[0]))
