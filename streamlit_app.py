@@ -73,12 +73,13 @@ with shap_placeholder.container():
     st_shap(shap.plots.force(explainer.expected_value, initial_shap_values.values[0], input_df.iloc[0]))
 
 # Sidebar form for input
+# Sidebar form for input
 with st.sidebar.form("input_form"):
     inputs = {}
-    inputs["Hand_Grip"] = st.number_input(f"{feature_descriptions["Hand_Grip"]}", value=X["Hand_Grip"].mean())
-    inputs["Balance"] = st.number_input(f"{feature_descriptions["Balance"]}", value=X["Balance"].mean())
-    inputs["CS_5"] = st.number_input(f"{feature_descriptions["CS_5"]}", value=X["CS_5"].mean())
-    inputs["Age"] = st.number_input(f"{feature_descriptions["Age"]}", value=X["Age"].mean())
+    inputs["Hand_Grip"] = st.number_input(feature_descriptions["Hand_Grip"], value=X["Hand_Grip"].mean())
+    inputs["Balance"] = st.number_input(feature_descriptions["Balance"], value=X["Balance"].mean())
+    inputs["CS_5"] = st.number_input(feature_descriptions["CS_5"], value=X["CS_5"].mean())
+    inputs["Age"] = st.number_input(feature_descriptions["Age"], value=X["Age"].mean())
     options = [(1, 'Yes'), (0, 'No')]
 
     inputs["Pain"] = st.selectbox(
@@ -99,10 +100,10 @@ with st.sidebar.form("input_form"):
         format_func=lambda x: x[1],
         index=1 if X["Depression"].mean() <= 0.5 else 0)[0]
     
-    
-    inputs["Breath"] = st.number_input(f"{feature_descriptions["Breath"]}", value=X["Breath"].mean())
-    inputs["Cognition"] = st.number_input(f"{feature_descriptions["Cognition"]}", value=X["Cognition"].mean())
+    inputs["Breath"] = st.number_input(feature_descriptions["Breath"], value=X["Breath"].mean())
+    inputs["Cognition"] = st.number_input(feature_descriptions["Cognition"], value=X["Cognition"].mean())
     submitted = st.form_submit_button("Predict")
+
 
 if submitted:
     input_df = pd.DataFrame([inputs])
