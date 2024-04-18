@@ -1,0 +1,6 @@
+shap==0.43.0
+st-gsheets-connection
+matplotlib==3.4.3
+streamlit-shap
+streamlit
+xgboost
