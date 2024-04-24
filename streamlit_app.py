@@ -7,7 +7,7 @@ import numpy as np
 
 
 # Load data and cache it to avoid reloading every time
-@st.cache_data
+@st.cache_data(persist=True)
 def load_data():
     from streamlit_gsheets import GSheetsConnection
     # Create a connection object using your specified authentication method
@@ -120,7 +120,7 @@ if 'loaded' not in st.session_state:
 if not st.session_state['loaded']:
     with st.empty():
         import time
-        time.sleep(10)  
+        time.sleep(1)  
         st.session_state['loaded'] = True
 
 
