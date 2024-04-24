@@ -54,23 +54,7 @@ input_df = pd.DataFrame([X.mean()])
 initial_prediction = model.predict(input_df)
 initial_shap_values = explainer(input_df)
 
-# Display initial prediction and SHAP plot
-with prediction_placeholder.container():
-    # st.write(f"Initial Predicted probability of disability: {initial_prediction[0]:.3f}")
-    st.markdown(f"""
-    <style>
-        .prediction {{
-            font-size: 20px;
-            margin-bottom: 20px;
-        }}
-        .p_num {{
-            color: rgb(255, 13, 87);
-        }}
-    </style>
-    <div class="prediction">Predicted probability of disability: <span class="p_num">{initial_prediction[0] * 100:.1f}%</span></div>
-    """, unsafe_allow_html=True)
-with shap_placeholder.container():
-    st_shap(shap.plots.force(explainer.expected_value, initial_shap_values.values[0], input_df.iloc[0]))
+
 
 # Sidebar form for input
 # Sidebar form for input
@@ -79,7 +63,8 @@ with st.sidebar.form("input_form"):
     options = [(1, 'Yes'), (0, 'No')]
     boptions = [(0, '0'), (1, '1'), (2, '2'),(3, '3')]
     coptions = [(0, '0'), (1, '1'),(2, '≥ 2')]
-    comorbidity_average = X["Comorbidities"].mean()
+    # comorbidity_average = X["Comorbidities"].mean()
+    comorbidity_average = 0
 
     # Determine the default index based on the average value
     if comorbidity_average < 0.5:
@@ -89,20 +74,24 @@ with st.sidebar.form("input_form"):
     else:
         com_default_index = 2  # '≥ 2'
 
-    ba_default_index = int(round(X["Balance"].mean()))
+    # ba_default_index = int(round(X["Balance"].mean()))
+    ba_default_index = 3
+
     if ba_default_index >= len(boptions):
         ba_default_index = len(boptions) - 1  # Adjust if the rounded mean is out of the option range
 
 
     inputs["Cognition"] = st.number_input(
         label=feature_descriptions["Cognition"],
-        value=int(round(X["Cognition"].mean())),  
+        # value=int(round(X["Cognition"].mean())),  
+        value=15,  
         step=1  
     )
 
     inputs["Breath"] = st.number_input(
         label=feature_descriptions["Breath"],
-        value=int(round(X["Breath"].mean())),  
+        # value=int(round(X["Breath"].mean())),  
+        value=285,  
         step=1  
     )
 
@@ -110,7 +99,8 @@ with st.sidebar.form("input_form"):
         feature_descriptions["Depression"],
         options=options,
         format_func=lambda x: x[1],
-        index=1 if X["Depression"].mean() <= 0.5 else 0)[0]
+        # index=1 if X["Depression"].mean() <= 0.5 else 0)[0]
+        index=0)[0]
     
     inputs["Comorbidities"] = st.selectbox(
         feature_descriptions["Comorbidities"],
@@ -122,15 +112,20 @@ with st.sidebar.form("input_form"):
         feature_descriptions["Pain"],
         options=options,
         format_func=lambda x: x[1],
-        index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
+        # index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
+        index = 0)[0]
 
     inputs["Age"] = st.number_input(
         label=feature_descriptions["Age"],
-        value=int(round(X["Age"].mean())),  
+        # value=int(round(X["Age"].mean())),  
+        value=67,  
         step=1  
     )
     
-    inputs["CS_5"] = st.number_input(feature_descriptions["CS_5"], value=X["CS_5"].mean())
+    inputs["CS_5"] = st.number_input(
+        feature_descriptions["CS_5"], 
+        # value=X["CS_5"].mean()
+        value = 9.14)
     
     inputs["Balance"] = st.selectbox(
         feature_descriptions["Balance"],
@@ -138,10 +133,45 @@ with st.sidebar.form("input_form"):
         format_func=lambda x: x[1],
         index=ba_default_index)[0]
 
-    inputs["Hand_Grip"] = st.number_input(feature_descriptions["Hand_Grip"], value=X["Hand_Grip"].mean())
+    inputs["Hand_Grip"] = st.number_input(
+        feature_descriptions["Hand_Grip"], 
+        # value=X["Hand_Grip"].mean())
+        value=31.32)
 
     submitted = st.form_submit_button("Predict")
 
+if 'loaded' not in st.session_state:
+    st.session_state['loaded'] = False
+
+if not st.session_state['loaded']:
+    with st.empty():
+        import time
+        time.sleep(1)  
+        st.session_state['loaded'] = True
+
+
+
+if st.session_state['loaded']:
+    input_df = pd.DataFrame([X.mean()])
+    prediction = model.predict(input_df)
+    shap_values = explainer(input_df)
+    # Display initial prediction and SHAP plot
+    with prediction_placeholder.container():
+        # st.write(f"Initial Predicted probability of disability: {initial_prediction[0]:.3f}")
+        st.markdown(f"""
+        <style>
+            .prediction {{
+                font-size: 20px;
+                margin-bottom: 20px;
+            }}
+            .p_num {{
+                color: rgb(255, 13, 87);
+            }}
+        </style>
+        <div class="prediction">Predicted probability of disability: <span class="p_num">{initial_prediction[0] * 100:.1f}%</span></div>
+        """, unsafe_allow_html=True)
+    with shap_placeholder.container():
+        st_shap(shap.plots.force(explainer.expected_value, initial_shap_values.values[0], input_df.iloc[0]))
 
 if submitted:
     input_df = pd.DataFrame([inputs])
