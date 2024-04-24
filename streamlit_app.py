@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 import xgboost as xgb
-import shap
+
 from sklearn.model_selection import train_test_split
 import numpy as np
-from streamlit_shap import st_shap
+
 from streamlit_gsheets import GSheetsConnection
 
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -18,7 +18,6 @@ def load_data():
     df = conn.read()
     return df
 
-data = load_data()
 feature_columns = ['Cognition','Breath','Depression','Comorbidities', 'Pain','Age','CS_5','Balance','Hand_Grip']
 feature_descriptions = {
     'Hand_Grip': "Hand Grip",
@@ -31,29 +30,6 @@ feature_descriptions = {
     'Breath': "Breathing Function",
     'Cognition': "Cognitive function"
 }
-X = data[feature_columns]
-y = data['Disability_2020']
-
-# Initialize and train model only if not in session state
-if 'model' not in st.session_state or 'explainer' not in st.session_state:
-    model = xgb.XGBRegressor(objective='reg:squarederror', random_state=42)
-    model.fit(X, y)
-    explainer = shap.Explainer(model, X)
-    st.session_state['model'] = model
-    st.session_state['explainer'] = explainer
-
-model = st.session_state['model']
-explainer = st.session_state['explainer']
-
-# Use placeholders for dynamic parts
-prediction_placeholder = st.empty()
-shap_placeholder = st.empty()
-
-# Calculate initial prediction and SHAP values using mean of features
-input_df = pd.DataFrame([X.mean()])
-initial_prediction = model.predict(input_df)
-initial_shap_values = explainer(input_df)
-
 
 
 # Sidebar form for input
@@ -152,6 +128,32 @@ if not st.session_state['loaded']:
 
 
 if st.session_state['loaded']:
+    import shap
+    from streamlit_shap import st_shap
+    data = load_data()
+    
+    X = data[feature_columns]
+    y = data['Disability_2020']
+
+    # Initialize and train model only if not in session state
+    if 'model' not in st.session_state or 'explainer' not in st.session_state:
+        model = xgb.XGBRegressor(objective='reg:squarederror', random_state=42)
+        model.fit(X, y)
+        explainer = shap.Explainer(model, X)
+        st.session_state['model'] = model
+        st.session_state['explainer'] = explainer
+
+    model = st.session_state['model']
+    explainer = st.session_state['explainer']
+
+    # Use placeholders for dynamic parts
+    prediction_placeholder = st.empty()
+    shap_placeholder = st.empty()
+
+    # Calculate initial prediction and SHAP values using mean of features
+    input_df = pd.DataFrame([X.mean()])
+    initial_prediction = model.predict(input_df)
+    initial_shap_values = explainer(input_df)
     input_df = pd.DataFrame([X.mean()])
     prediction = model.predict(input_df)
     shap_values = explainer(input_df)
