@@ -5,13 +5,14 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-from streamlit_gsheets import GSheetsConnection
 
-conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read()
 # Load data and cache it to avoid reloading every time
 @st.cache_data
 def load_data():
+    from streamlit_gsheets import GSheetsConnection
+
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    df = conn.read()
     # Create a connection object using your specified authentication method
     conn = st.connection("gsheets", type=GSheetsConnection)
     # You need to specify the name or ID of your sheet and possibly the range if not the whole sheet
