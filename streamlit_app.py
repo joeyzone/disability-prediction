@@ -74,7 +74,7 @@ with st.sidebar.form("input_form"):
         options=options,
         format_func=lambda x: x[1],
         # index=1 if X["Depression"].mean() <= 0.5 else 0)[0]
-        index=0)[0]
+        index=1)[0]
     
     inputs["Comorbidities"] = st.selectbox(
         feature_descriptions["Comorbidities"],
@@ -87,7 +87,7 @@ with st.sidebar.form("input_form"):
         options=options,
         format_func=lambda x: x[1],
         # index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
-        index = 0)[0]
+        index=1)[0]
 
     inputs["Age"] = st.number_input(
         label=feature_descriptions["Age"],
