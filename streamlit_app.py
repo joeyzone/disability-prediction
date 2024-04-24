@@ -10,9 +10,6 @@ import numpy as np
 @st.cache_data
 def load_data():
     from streamlit_gsheets import GSheetsConnection
-
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read()
     # Create a connection object using your specified authentication method
     conn = st.connection("gsheets", type=GSheetsConnection)
     # You need to specify the name or ID of your sheet and possibly the range if not the whole sheet
@@ -123,7 +120,7 @@ if 'loaded' not in st.session_state:
 if not st.session_state['loaded']:
     with st.empty():
         import time
-        time.sleep(1)  
+        time.sleep(10)  
         st.session_state['loaded'] = True
 
 
