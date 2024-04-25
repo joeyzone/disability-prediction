@@ -121,7 +121,7 @@ if 'loaded' not in st.session_state:
 if not st.session_state['loaded']:
     with st.empty():
         import time
-        time.sleep(0.5)  
+        time.sleep(0.1)  
         st.session_state['loaded'] = True
 
 
