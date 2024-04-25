@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import xgboost as xgb
 
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 import numpy as np
 import shap
 from streamlit_shap import st_shap
@@ -127,6 +127,17 @@ if not st.session_state['loaded']:
 
 
 
+@st.cache_data(persist="disk")
+def load_model_explainer():
+    print("load_model")
+    model = xgb.XGBRegressor(objective='reg:squarederror', random_state=42)
+    model.fit(X, y)
+    explainer = shap.Explainer(model, X)
+    input_df = pd.DataFrame([X.mean()])
+    prediction = model.predict(input_df)
+    shap_values = explainer(input_df)
+    return [model, explainer,input_df,prediction,shap_values]
+
 if st.session_state['loaded']:
     data = load_data()
     
@@ -134,24 +145,24 @@ if st.session_state['loaded']:
     y = data['Disability_2020']
 
     # Initialize and train model only if not in session state
-    if 'model' not in st.session_state or 'explainer' not in st.session_state:
-        model = xgb.XGBRegressor(objective='reg:squarederror', random_state=42)
-        model.fit(X, y)
-        explainer = shap.Explainer(model, X)
-        st.session_state['model'] = model
-        st.session_state['explainer'] = explainer
+    # if 'model' not in st.session_state or 'explainer' not in st.session_state:
+    #     print("model new")
+    #     model = xgb.XGBRegressor(objective='reg:squarederror', random_state=42)
+    #     model.fit(X, y)
+    #     explainer = shap.Explainer(model, X)
+    #     st.session_state['model'] = model
+    #     st.session_state['explainer'] = explainer
 
-    model = st.session_state['model']
-    explainer = st.session_state['explainer']
+    # model = st.session_state['model']
+    # explainer = st.session_state['explainer']
+    [model, explainer,input_df,prediction,shap_values] = load_model_explainer()
 
     # Use placeholders for dynamic parts
     prediction_placeholder = st.empty()
     shap_placeholder = st.empty()
 
     # Calculate initial prediction and SHAP values using mean of features
-    input_df = pd.DataFrame([X.mean()])
-    prediction = model.predict(input_df)
-    shap_values = explainer(input_df)
+    
     # Display initial prediction and SHAP plot
     with prediction_placeholder.container():
         # st.write(f"Initial Predicted probability of disability: {initial_prediction[0]:.3f}")
@@ -165,10 +176,10 @@ if st.session_state['loaded']:
                 color: rgb(255, 13, 87);
             }}
         </style>
-        <div class="prediction">Predicted probability of disability: <span class="p_num">{initial_prediction[0] * 100:.1f}%</span></div>
+        <div class="prediction">Predicted probability of disability: <span class="p_num">{prediction[0] * 100:.1f}%</span></div>
         """, unsafe_allow_html=True)
     with shap_placeholder.container():
-        st_shap(shap.plots.force(explainer.expected_value, initial_shap_values.values[0], input_df.iloc[0]))
+        st_shap(shap.plots.force(explainer.expected_value, shap_values.values[0], input_df.iloc[0]))
 
 if submitted:
     input_df = pd.DataFrame([inputs])
