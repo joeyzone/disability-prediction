@@ -4,12 +4,14 @@ import xgboost as xgb
 
 from sklearn.model_selection import train_test_split
 import numpy as np
-
+import shap
+from streamlit_shap import st_shap
+from streamlit_gsheets import GSheetsConnection
+import time
 
 # Load data and cache it to avoid reloading every time
 @st.cache_data(persist="disk")
 def load_data():
-    from streamlit_gsheets import GSheetsConnection
     # Create a connection object using your specified authentication method
     print("load_data")
     conn = st.connection("gsheets", type=GSheetsConnection)
@@ -120,15 +122,12 @@ if 'loaded' not in st.session_state:
 
 if not st.session_state['loaded']:
     with st.empty():
-        import time
         time.sleep(0.1)  
         st.session_state['loaded'] = True
 
 
 
 if st.session_state['loaded']:
-    import shap
-    from streamlit_shap import st_shap
     data = load_data()
     
     X = data[feature_columns]
@@ -150,9 +149,6 @@ if st.session_state['loaded']:
     shap_placeholder = st.empty()
 
     # Calculate initial prediction and SHAP values using mean of features
-    input_df = pd.DataFrame([X.mean()])
-    initial_prediction = model.predict(input_df)
-    initial_shap_values = explainer(input_df)
     input_df = pd.DataFrame([X.mean()])
     prediction = model.predict(input_df)
     shap_values = explainer(input_df)
