@@ -7,10 +7,11 @@ import numpy as np
 
 
 # Load data and cache it to avoid reloading every time
-@st.cache_data(persist=True)
+@st.cache_data(persist="disk")
 def load_data():
     from streamlit_gsheets import GSheetsConnection
     # Create a connection object using your specified authentication method
+    print("load_data")
     conn = st.connection("gsheets", type=GSheetsConnection)
     # You need to specify the name or ID of your sheet and possibly the range if not the whole sheet
     df = conn.read()
