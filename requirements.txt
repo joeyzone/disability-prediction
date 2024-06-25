@@ -3,6 +3,6 @@ st-gsheets-connection
 matplotlib==3.4.3
 streamlit-shap
 streamlit
-xgboost
+xgboost==2.0.3
 pandas
 numpy==1.26.4
