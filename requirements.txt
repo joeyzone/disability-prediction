@@ -4,5 +4,5 @@ matplotlib==3.4.3
 streamlit-shap==1.0.2
 streamlit==1.36.0
 xgboost==2.0.3
-pandas==2.2.2
+pandas
 numpy==1.26.4
