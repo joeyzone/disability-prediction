@@ -1,8 +1,8 @@
 shap==0.43.0
-st-gsheets-connection
+st-gsheets-connection==0.0.4
 matplotlib==3.4.3
-streamlit-shap
-streamlit
+streamlit-shap==1.0.2
+streamlit==1.36.0
 xgboost==2.0.3
-pandas
+pandas==2.2.2
 numpy==1.26.4
