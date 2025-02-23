@@ -89,17 +89,43 @@ with st.sidebar.form("input_form"):
         ba_default_index = len(boptions) - 1  # Adjust if the rounded mean is out of the option range
 
 
+    inputs["Pain"] = st.selectbox(
+        feature_descriptions["Pain"],
+        options=options,
+        format_func=lambda x: x[1],
+        index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
+    
+    inputs["Breath"] = st.number_input(
+        label=feature_descriptions["Breath"],
+        value=int(round(X["Breath"].mean())),  
+        step=1  
+    )
+
+    inputs["Age"] = st.number_input(
+        label=feature_descriptions["Age"],
+        value=int(round(X["Age"].mean())),  
+        step=1  
+    )
+
+    inputs["Hand_Grip"] = st.number_input(
+    feature_descriptions["Hand_Grip"], 
+    value=X["Hand_Grip"].mean())
+
+    inputs["CS_5"] = st.number_input(
+    feature_descriptions["CS_5"], 
+    value=X["CS_5"].mean())
+    
     inputs["Cognition"] = st.number_input(
         label=feature_descriptions["Cognition"],
         value=int(round(X["Cognition"].mean())),  
         step=1  
     )
 
-    inputs["Breath"] = st.number_input(
-        label=feature_descriptions["Breath"],
-        value=int(round(X["Breath"].mean())),  
-        step=1  
-    )
+    inputs["Comorbidities"] = st.selectbox(
+    feature_descriptions["Comorbidities"],
+    options=coptions,
+    format_func=lambda x: x[1],
+    index=com_default_index)[0]
 
     inputs["Depression"] = st.selectbox(
         feature_descriptions["Depression"],
@@ -107,37 +133,13 @@ with st.sidebar.form("input_form"):
         format_func=lambda x: x[1],
         index=1 if X["Depression"].mean() <= 0.5 else 0)[0]
     
-    inputs["Comorbidities"] = st.selectbox(
-        feature_descriptions["Comorbidities"],
-        options=coptions,
-        format_func=lambda x: x[1],
-        index=com_default_index)[0]
-    
-    inputs["Pain"] = st.selectbox(
-        feature_descriptions["Pain"],
-        options=options,
-        format_func=lambda x: x[1],
-        index=1 if X["Pain"].mean() <= 0.5 else 0)[0]
-
-    inputs["Age"] = st.number_input(
-        label=feature_descriptions["Age"],
-        value=int(round(X["Age"].mean())),  
-        step=1  
-    )
-    
-    inputs["CS_5"] = st.number_input(
-        feature_descriptions["CS_5"], 
-        value=X["CS_5"].mean())
-    
     inputs["Balance"] = st.selectbox(
         feature_descriptions["Balance"],
         options=boptions,
         format_func=lambda x: x[1],
         index=ba_default_index)[0]
 
-    inputs["Hand_Grip"] = st.number_input(
-        feature_descriptions["Hand_Grip"], 
-        value=X["Hand_Grip"].mean())
+
 
     submitted = st.form_submit_button("Predict")
 
