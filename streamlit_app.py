@@ -19,7 +19,7 @@ def load_data():
     df = conn.read()
     return df
 
-feature_columns = ['Cognition','Breath','Depression','Comorbidities', 'Pain','Age','CS_5','Balance','Hand_Grip']
+feature_columns = ['Pain', 'Breath','Age', 'Hand_Grip','CS_5','Cognition','Comorbidities','Depression','Balance']
 feature_descriptions = {
     'Hand_Grip': "Hand Grip",
     'Balance': "Standing Balance",
